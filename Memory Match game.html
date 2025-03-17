@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <style>
+        body { 
+            text-align: center; 
+            font-family: Arial, sans-serif; 
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #ff6600;
+        }
+        .game-board { 
+            display: grid; 
+            grid-template-columns: repeat(4, 120px); 
+            gap: 15px; 
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card { 
+            width: 120px; 
+            height: 120px; 
+            background: #eee; 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2.5rem; 
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .card:hover {
+            background: #ddd;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Match</h1>
+    <p>Find all matching food pairs!</p>
+    <div class="game-board"></div>
+    
+    <script>
+        const foodItems = ['🍕', '🍔', '🍎', '🍇', '🍓', '🍩', '🍪', '🥑'];
+        let cards = [...foodItems, ...foodItems].sort(() => Math.random() - 0.5);
+        let gameBoard = document.querySelector('.game-board');
+        let firstCard = null, secondCard = null, lockBoard = false;
+        
+        cards.forEach(item => {
+            let card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.value = item;
+            card.innerHTML = '❓'; // Hidden state
+            card.addEventListener('click', flipCard);
+            gameBoard.appendChild(card);
+        });
+
+        function flipCard() {
+            if (lockBoard || this.textContent !== '❓') return;
+            this.innerHTML = this.dataset.value;
+            if (!firstCard) {
+                firstCard = this;
+            } else {
+                secondCard = this;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            lockBoard = true;
+            if (firstCard.dataset.value === secondCard.dataset.value) {
+                setTimeout(() => {
+                    firstCard.style.visibility = 'hidden';
+                    secondCard.style.visibility = 'hidden';
+                    resetBoard();
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    firstCard.innerHTML = secondCard.innerHTML = '❓';
+                    resetBoard();
+                }, 1000);
+            }
+        }
+
+        function resetBoard() {
+            firstCard = secondCard = null;
+            lockBoard = false;
+        }
+    </script>
+</body>
+</html>
