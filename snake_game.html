@@ -127,19 +127,20 @@
             gameRunning = false;
             setTimeout(() => {
                 alert("Game Over! Score: " + score);
+                sendScore(score); // Send score when the game is over
             }, 100);
         }
 
         function restartGame() {
             location.reload();
         }
-        // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
+
+        function gameComplete(score) {
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score  // coins earned
+            }, '*');
+        }
 
         function exitGame() {
             window.location.href = "index.html";
@@ -150,14 +151,15 @@ function gameComplete(score) {
                 direction = e.key.slice(5).toUpperCase();
             }
         });
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
+
+        function sendScore(score) {
+            window.parent.postMessage({
+                type: 'SCORE',
+                score: score
+            }, '*');
+        }
+
+        // Initialize the game
         updateGame();
     </script>
 </body>
