@@ -203,7 +203,14 @@ function gameComplete(score) {
         score: score  // coins earned
     }, '*');
 }
-
+function sendScore(score) {
+    window.parent.postMessage(score, '*');
+}
+// When game is over
+let finalScore = playerScore; // or however you track score
+sendScore(finalScore);
+// Call this when game is over, for example:
+// sendScore(1000); // if player scored 1000 points
         setInterval(spawnFood, 2000);
         setInterval(spawnObstacle, 3000);
         updateGame();
