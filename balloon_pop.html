@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balloon Pop 🎈</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to top, #4facfe, #00f2fe);
+            color: white;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 32px;
+            color: yellow;
+            margin-top: 10px;
+            text-shadow: 2px 2px 5px black;
+        }
+        .scoreboard {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            overflow: hidden;
+        }
+        .balloon {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: red;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            animation: floatUp 5s linear infinite;
+        }
+        @keyframes floatUp {
+            from { transform: translateY(100vh); opacity: 1; }
+            to { transform: translateY(-100px); opacity: 0; }
+        }
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .replay { background: yellow; color: black; }
+        .exit { background: red; color: white; }
+        .btn:hover {
+            transform: scale(1.1);
+        }
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎈 Balloon Pop Game</h1>
+    <p>Tap on the balloons to pop them before they disappear!</p>
+    <div class="scoreboard">Score: <span id="score">0</span> | Time Left: <span id="time">30</span>s</div>
+    <div class="game-container" id="gameContainer"></div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="gameOverScreen">
+        <h2>Game Over!</h2>
+        <p>Your Final Score: <span id="finalScore"></span></p>
+        <button class="btn replay" onclick="restartGame()">Replay 🔄</button>
+        <button class="btn exit" onclick="exitGame()">Exit 🚪</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById("gameContainer");
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        const finalScoreDisplay = document.getElementById("finalScore");
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval, timerInterval;
+
+        function createBalloon() {
+            let balloon = document.createElement("div");
+            balloon.classList.add("balloon");
+            balloon.style.left = Math.random() * (window.innerWidth - 60) + "px";
+            balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            balloon.onclick = function () {
+                score++;
+                document.getElementById("score").textContent = score;
+                balloon.remove();
+            };
+            gameContainer.appendChild(balloon);
+            setTimeout(() => balloon.remove(), 5000);
+        }
+
+        function startGame() {
+            gameInterval = setInterval(createBalloon, 700);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("time").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    clearInterval(timerInterval);
+                    showGameOverScreen();
+                }
+            }, 1000);
+        }
+
+        function showGameOverScreen() {
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.style.display = "block";
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function exitGame() {
+            window.location.href = "index.html"; // Redirect to main menu
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

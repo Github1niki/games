@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Chef Challenge 👨‍🍳🔥</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f7c08a, #ff8c42);
+            color: white;
+        }
+        h1 {
+            font-size: 32px;
+            color: #fff;
+            text-shadow: 2px 2px 5px black;
+        }
+        .scoreboard {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .game-container {
+            width: 400px;
+            height: 500px;
+            margin: auto;
+            background: #fff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ingredient, .rotten-food {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-size: contain;
+            cursor: pointer;
+        }
+        .chef {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: url('https://img.icons8.com/color/96/chef-hat.png') no-repeat center;
+            background-size: contain;
+        }
+        .order-box {
+            background: #222;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .replay { background: green; color: white; }
+        .exit { background: red; color: white; }
+        .btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Master Chef Challenge 👨‍🍳🔥</h1>
+    <p>Collect only the **correct ingredients** for the order & avoid rotten food!</p>
+    <div class="scoreboard">Score: <span id="score">0</span> | Time Left: <span id="time">60</span>s</div>
+    <div class="order-box">Current Order: <span id="currentOrder"></span></div>
+    <div class="game-container" id="gameContainer">
+        <div class="chef"></div>
+    </div>
+
+    <button class="btn replay" onclick="restartGame()">Replay 🔄</button>
+    <button class="btn exit" onclick="exitGame()">Exit 🚪</button>
+
+    <script>
+        const gameContainer = document.getElementById("gameContainer");
+        const orderDisplay = document.getElementById("currentOrder");
+        let score = 0;
+        let timeLeft = 60;
+        let gameRunning = true;
+        let activeOrder = [];
+        let maxItemsOnScreen = 5; // ✅ Limits the number of items on screen
+
+        const ingredients = [
+            "https://img.icons8.com/color/96/tomato.png",
+            "https://img.icons8.com/color/96/cheese.png",
+            "https://img.icons8.com/color/96/bread.png",
+            "https://img.icons8.com/color/96/meat.png",
+            "https://img.icons8.com/color/96/lettuce.png"
+        ];
+
+        const rottenFood = [
+            "https://img.icons8.com/color/96/rotten-apple.png", 
+            "https://img.icons8.com/color/96/expired-food.png"
+        ];
+
+        function generateNewOrder() {
+            let randomOrder = [];
+            for (let i = 0; i < 3; i++) {
+                randomOrder.push(ingredients[Math.floor(Math.random() * ingredients.length)]);
+            }
+            activeOrder = randomOrder;
+            orderDisplay.innerHTML = activeOrder.map(img => `<img src="${img}" width="30">`).join(" ");
+        }
+
+        function createItem(type) {
+            if (!gameRunning) return;
+
+            // ✅ Checks if max items are already present
+            if (document.querySelectorAll(".ingredient, .rotten-food").length >= maxItemsOnScreen) return;
+
+            let item = document.createElement("div");
+            item.classList.add(type === "ingredient" ? "ingredient" : "rotten-food");
+            item.style.left = Math.random() * 350 + "px";
+            item.style.top = "-50px";
+            let imgSrc = type === "ingredient"
+                ? ingredients[Math.floor(Math.random() * ingredients.length)]
+                : rottenFood[Math.floor(Math.random() * rottenFood.length)];
+            item.style.background = `url('${imgSrc}') no-repeat center`;
+            item.style.backgroundSize = "contain";
+
+            item.onclick = function () {
+                if (type === "ingredient") {
+                    if (activeOrder.includes(imgSrc)) {
+                        score += 5; // ✅ Right ingredient
+                        activeOrder = activeOrder.filter(i => i !== imgSrc);
+                    } else {
+                        score -= 5; // ❌ Wrong ingredient
+                    }
+                } else if (type === "rotten-food") {
+                    score -= 10; // 🚫 Rotten food
+                }
+                document.getElementById("score").textContent = score;
+                item.remove();
+                if (activeOrder.length === 0) generateNewOrder();
+            };
+
+            gameContainer.appendChild(item);
+            let fallInterval = setInterval(() => {
+                if (!gameRunning) return clearInterval(fallInterval);
+                let currentTop = parseInt(item.style.top) || 0;
+                if (currentTop >= 450) {
+                    clearInterval(fallInterval);
+                    item.remove();
+                } else {
+                    item.style.top = currentTop + 6 + "px"; // ✅ Increased speed (Before: 4px)
+                }
+            }, 50); // ✅ Faster movement
+
+            setTimeout(() => createItem("ingredient"), 1500); // ✅ Faster spawn rate
+            setTimeout(() => createItem("rotten-food"), 3500);
+        }
+
+        function startTimer() {
+            let timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("time").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gameRunning = false;
+                    alert("Time's Up! Final Score: " + score);
+                }
+            }, 1000);
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function exitGame() {
+            window.location.href = "index.html";
+        }
+
+        generateNewOrder();
+        createItem("ingredient");
+        createItem("rotten-food");
+        startTimer();
+    </script>
+</body>
+</html>

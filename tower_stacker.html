@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Stacker Game</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background: linear-gradient(to bottom, #87CEFA, #4682B4); }
+        canvas { border: 3px solid black; display: block; margin: auto; background: white; }
+        .controls { margin-top: 10px; }
+        .btn { padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+        .replay { background: green; color: white; }
+        .exit { background: red; color: white; }
+        .scoreboard { font-size: 20px; font-weight: bold; color: white; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1 style="color: white;">Tower Stacker 🏗️</h1>
+    <p style="color: white;">Press "Space" or Tap to drop blocks!</p>
+    <div class="scoreboard">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    
+    <div class="controls">
+        <button class="btn replay" onclick="restartGame()">Replay 🔄</button>
+        <button class="btn exit" onclick="exitGame()">Exit 🚪</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let blocks = [];
+        let score = 0;
+        let currentX = 50;
+        let blockWidth = 100;
+        let blockHeight = 20;
+        let moveRight = true;
+        let gameRunning = true;
+        let speed = 4; // Speed of moving block
+        let colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#FFD700"]; // Colors for blocks
+
+        function drawBlocks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            blocks.forEach((block, index) => {
+                ctx.fillStyle = colors[index % colors.length]; // Assign different colors
+                ctx.fillRect(block.x, block.y, block.width, blockHeight);
+            });
+
+            // Moving block
+            ctx.fillStyle = colors[blocks.length % colors.length];
+            ctx.fillRect(currentX, 20, blockWidth, blockHeight);
+        }
+
+        function updateGame() {
+            if (!gameRunning) return;
+            currentX += moveRight ? speed : -speed;
+            if (currentX <= 0 || currentX + blockWidth >= canvas.width) moveRight = !moveRight;
+            drawBlocks();
+            requestAnimationFrame(updateGame);
+        }
+
+        function dropBlock() {
+            if (!gameRunning) return;
+
+            let y = blocks.length * blockHeight + 50;
+            let lastBlock = blocks[blocks.length - 1];
+
+            if (blocks.length > 0) {
+                let overlap = Math.max(0, Math.min(currentX + blockWidth, lastBlock.x + lastBlock.width) - Math.max(currentX, lastBlock.x));
+                if (overlap < blockWidth / 2) {
+                    gameOver(); // If overlap is too small, game over
+                    return;
+                }
+                blockWidth = overlap; // Reduce block size based on overlap
+                currentX = Math.max(currentX, lastBlock.x);
+            }
+
+            blocks.push({ x: currentX, y, width: blockWidth });
+            score++;
+            document.getElementById("score").textContent = score;
+
+            if (blockWidth < 10) {
+                gameOver(); // If block is too small, end the game
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            alert("Game Over! Final Score: " + score);
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function exitGame() {
+            window.location.href = "index.html";
+        }
+
+        document.addEventListener("keydown", (e) => { if (e.code === "Space") dropBlock(); });
+        document.addEventListener("touchstart", dropBlock);
+
+        updateGame();
+    </script>
+</body>
+</html>
