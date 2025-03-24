@@ -145,7 +145,10 @@
                     scoreDisplay.textContent = score;
                     resetBoard();
                     if (matchedPairs === foodItems.length) {
-                        setTimeout(() => alert(`🎉 You won! Final Score: ${score}`), 500);
+                        setTimeout(() => {
+                            alert(`🎉 You won! Final Score: ${score}`);
+                            gameComplete(score); // Send score when game is complete
+                        }, 500);
                     }
                 }, 500);
             } else {
@@ -168,22 +171,21 @@
         function exitGame() {
             window.location.href = 'index.html'; // Redirects to the main menu
         }
+
         // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
-        startGame(); // Initialize the game
+        function gameComplete(score) {
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score  // Send the score to the parent window (if needed, for example in an iframe)
+            }, '*');
+        }
+
+        function sendScore(score) {
+            window.parent.postMessage(score, '*');
+        }
+
+        // Initialize the game
+        startGame(); // Start the game when the page loads
     </script>
 </body>
 </html>
