@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Runner Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        canvas {
+            border: 2px solid black;
+            display: block;
+            margin: auto;
+            max-width: 100%;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 5px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn:active {
+            background: #cc5500;
+        }
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .score {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Food Runner Game</h1>
+    <p>Collect the food and avoid the obstacles!</p>
+    
+    <div class="score">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    
+    <div class="controls">
+        <button class="btn" id="leftBtn">⬅ Left</button>
+        <button class="btn" id="rightBtn">Right ➡</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="gameOverScreen">
+        <h2>Game Over!</h2>
+        <p>Your Score: <span id="finalScore"></span></p>
+        <button class="btn" onclick="restartGame()">Replay 🔄</button>
+        <button class="btn" onclick="exitGame()">Exit ❌</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const playerImg = new Image();
+        playerImg.src = "https://cdn-icons-png.flaticon.com/512/4144/4144766.png"; 
+
+        const foodImages = [
+            "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+            "https://cdn-icons-png.flaticon.com/512/1046/1046785.png",
+            "https://cdn-icons-png.flaticon.com/512/1046/1046786.png"
+        ];
+
+        const obstacleImg = new Image();
+        obstacleImg.src = "https://cdn-icons-png.flaticon.com/512/151/151860.png"; 
+
+        let player = { x: 175, y: 400, width: 50, height: 50 };
+        let foods = [];
+        let obstacles = [];
+        let score = 0;
+        let gameRunning = true;
+
+        function drawPlayer() {
+            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        }
+
+        function drawFoods() {
+            foods.forEach(food => {
+                const img = new Image();
+                img.src = food.image;
+                ctx.drawImage(img, food.x, food.y, food.size, food.size);
+            });
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                ctx.drawImage(obstacleImg, obs.x, obs.y, obs.size, obs.size);
+            });
+        }
+
+        function updateGame() {
+            if (!gameRunning) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawFoods();
+            drawObstacles();
+            moveFoods();
+            moveObstacles();
+            checkCollisions();
+            requestAnimationFrame(updateGame);
+        }
+
+        function moveFoods() {
+            foods.forEach(food => food.y += 3);
+            foods = foods.filter(food => food.y < canvas.height);
+        }
+
+        function moveObstacles() {
+            obstacles.forEach(obs => obs.y += 4);
+            obstacles = obstacles.filter(obs => obs.y < canvas.height);
+        }
+
+        function checkCollisions() {
+            foods.forEach((food, index) => {
+                if (
+                    player.x < food.x + food.size &&
+                    player.x + player.width > food.x &&
+                    player.y < food.y + food.size &&
+                    player.y + player.height > food.y
+                ) {
+                    foods.splice(index, 1);
+                    score++;
+                    document.getElementById("score").textContent = score;
+                }
+            });
+
+            obstacles.forEach((obs, index) => {
+                if (
+                    player.x < obs.x + obs.size &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.size &&
+                    player.y + player.height > obs.y
+                ) {
+                    gameOver();
+                }
+            });
+        }
+
+        function spawnFood() {
+            let randomImage = foodImages[Math.floor(Math.random() * foodImages.length)];
+            foods.push({ x: Math.random() * 350, y: 0, size: 40, image: randomImage });
+        }
+
+        function spawnObstacle() {
+            obstacles.push({ x: Math.random() * 350, y: 0, size: 50 });
+        }
+
+        // Move player using buttons (for mobile support)
+        document.getElementById("leftBtn").addEventListener("click", () => {
+            if (player.x > 0) player.x -= 20;
+        });
+
+        document.getElementById("rightBtn").addEventListener("click", () => {
+            if (player.x < 350) player.x += 20;
+        });
+
+        // Move player using keyboard (for desktop support)
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft" && player.x > 0) player.x -= 20;
+            if (event.key === "ArrowRight" && player.x < 350) player.x += 20;
+        });
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById("finalScore").textContent = score;
+            document.getElementById("gameOverScreen").style.display = "block";
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        function exitGame() {
+            window.location.href = 'index.html'; 
+        }
+
+        setInterval(spawnFood, 2000);
+        setInterval(spawnObstacle, 3000);
+        updateGame();
+    </script>
+</body>
+</html>
