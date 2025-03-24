@@ -129,6 +129,7 @@
         function showGameOverScreen() {
             finalScoreDisplay.textContent = score;
             gameOverScreen.style.display = "block";
+            sendScore(score); // Send score when the game ends
         }
 
         function restartGame() {
@@ -138,21 +139,16 @@
         function exitGame() {
             window.location.href = "index.html"; // Redirect to main menu
         }
-        // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
+
+        function sendScore(score) {
+            // Sending score using postMessage (if it's being used in an iframe or similar)
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score
+            }, '*');
+        }
+
+        // Start the game immediately
         startGame();
     </script>
 </body>
