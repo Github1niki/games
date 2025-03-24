@@ -111,7 +111,14 @@ function gameComplete(score) {
         score: score  // coins earned
     }, '*');
 }
-
+function sendScore(score) {
+    window.parent.postMessage(score, '*');
+}
+// When game is over
+let finalScore = playerScore; // or however you track score
+sendScore(finalScore);
+// Call this when game is over, for example:
+// sendScore(1000); // if player scored 1000 points
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowLeft") paddle.speed = -5;
             if (event.key === "ArrowRight") paddle.speed = 5;
