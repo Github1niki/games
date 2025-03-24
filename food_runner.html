@@ -93,10 +93,12 @@
         let score = 0;
         let gameRunning = true;
 
+        // Draw the player on the canvas
         function drawPlayer() {
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
         }
 
+        // Draw all the food items on the canvas
         function drawFoods() {
             foods.forEach(food => {
                 const img = new Image();
@@ -105,12 +107,14 @@
             });
         }
 
+        // Draw all the obstacles on the canvas
         function drawObstacles() {
             obstacles.forEach(obs => {
                 ctx.drawImage(obstacleImg, obs.x, obs.y, obs.size, obs.size);
             });
         }
 
+        // Update the game state each frame
         function updateGame() {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -123,16 +127,19 @@
             requestAnimationFrame(updateGame);
         }
 
+        // Move food items down the screen
         function moveFoods() {
             foods.forEach(food => food.y += 3);
             foods = foods.filter(food => food.y < canvas.height);
         }
 
+        // Move obstacles down the screen
         function moveObstacles() {
             obstacles.forEach(obs => obs.y += 4);
             obstacles = obstacles.filter(obs => obs.y < canvas.height);
         }
 
+        // Check for collisions between player, food, and obstacles
         function checkCollisions() {
             foods.forEach((food, index) => {
                 if (
@@ -159,11 +166,13 @@
             });
         }
 
+        // Spawn food at random positions
         function spawnFood() {
             let randomImage = foodImages[Math.floor(Math.random() * foodImages.length)];
             foods.push({ x: Math.random() * 350, y: 0, size: 40, image: randomImage });
         }
 
+        // Spawn obstacles at random positions
         function spawnObstacle() {
             obstacles.push({ x: Math.random() * 350, y: 0, size: 50 });
         }
@@ -183,34 +192,39 @@
             if (event.key === "ArrowRight" && player.x < 350) player.x += 20;
         });
 
+        // End the game and show the Game Over screen
         function gameOver() {
             gameRunning = false;
             document.getElementById("finalScore").textContent = score;
             document.getElementById("gameOverScreen").style.display = "block";
+            sendScore(score);
         }
 
+        // Restart the game by resetting game state
         function restartGame() {
-            location.reload();
+            score = 0;
+            document.getElementById("score").textContent = score;
+            foods = [];
+            obstacles = [];
+            gameRunning = true;
+            document.getElementById("gameOverScreen").style.display = "none";
+            updateGame();
         }
 
+        // Exit the game by redirecting to another page
         function exitGame() {
             window.location.href = 'index.html'; 
         }
-        // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
+
+        // Send the score to the parent (if needed, for example in iframe)
+        function sendScore(score) {
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score
+            }, '*');
+        }
+
+        // Start the game
         setInterval(spawnFood, 2000);
         setInterval(spawnObstacle, 3000);
         updateGame();
