@@ -150,7 +150,14 @@ function gameComplete(score) {
                 direction = e.key.slice(5).toUpperCase();
             }
         });
-
+function sendScore(score) {
+    window.parent.postMessage(score, '*');
+}
+// When game is over
+let finalScore = playerScore; // or however you track score
+sendScore(finalScore);
+// Call this when game is over, for example:
+// sendScore(1000); // if player scored 1000 points
         updateGame();
     </script>
 </body>
