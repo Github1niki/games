@@ -95,6 +95,7 @@
         function gameOver() {
             gameRunning = false;
             alert("Game Over! Score: " + score);
+            sendScore(score); // Send score when the game ends
         }
 
         function restartGame() {
@@ -104,27 +105,24 @@
         function exitGame() {
             window.location.href = "index.html";
         }
-        // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
+
+        function sendScore(score) {
+            // Send score when the game ends (to parent, if in an iframe)
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score
+            }, '*');
+        }
+
+        // Add event listeners for controlling the paddle
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowLeft") paddle.speed = -5;
             if (event.key === "ArrowRight") paddle.speed = 5;
         });
+
         document.addEventListener("keyup", () => paddle.speed = 0);
 
+        // Start the game
         updateGame();
     </script>
 </body>
