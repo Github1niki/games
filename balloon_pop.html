@@ -138,6 +138,13 @@
         function exitGame() {
             window.location.href = "index.html"; // Redirect to main menu
         }
+        // When game is complete
+function gameComplete(score) {
+    window.parent.postMessage({
+        type: 'GAME_COMPLETE',
+        score: score  // coins earned
+    }, '*');
+}
 
         startGame();
     </script>
