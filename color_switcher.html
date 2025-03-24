@@ -87,7 +87,7 @@
         const bar = document.querySelector('.bar');
         const scoreDisplay = document.getElementById('score');
         const gameOverScreen = document.querySelector('.game-over');
-        const finalScore = document.getElementById('final-score');
+        const finalScoreDisplay = document.getElementById('final-score');
         let score = 0;
         let gameRunning = true;
 
@@ -114,36 +114,37 @@
         function gameOver() {
             gameRunning = false;
             gameOverScreen.style.display = 'block';
-            finalScore.textContent = score;
+            finalScoreDisplay.textContent = score;
+            sendScore(score); // Send score when the game ends
         }
 
         function restartGame() {
-            location.reload();
+            score = 0;
+            scoreDisplay.textContent = score;
+            gameRunning = true;
+            gameOverScreen.style.display = 'none';
+            changeColors();
+            setInterval(changeColors, 2000);
         }
 
         function exitGame() {
             window.location.href = 'index.html'; // Redirects to the main menu
         }
-        // When game is complete
-function gameComplete(score) {
-    window.parent.postMessage({
-        type: 'GAME_COMPLETE',
-        score: score  // coins earned
-    }, '*');
-}
-function sendScore(score) {
-    window.parent.postMessage(score, '*');
-}
-// When game is over
-let finalScore = playerScore; // or however you track score
-sendScore(finalScore);
-// Call this when game is over, for example:
-// sendScore(1000); // if player scored 1000 points
+
+        function sendScore(score) {
+            // Send score when the game ends (to parent, if in an iframe)
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                score: score
+            }, '*');
+        }
+
+        // Event listeners for user interaction
         document.addEventListener('click', checkMatch);
         document.addEventListener('touchstart', checkMatch);
 
         changeColors();
-        setInterval(changeColors, 2000);
+        setInterval(changeColors, 2000); // Change colors every 2 seconds
     </script>
 </body>
 </html>
